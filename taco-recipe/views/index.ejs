@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Taco Recipes</title>
+
+    <!-- 提前套用背景以避免閃白 -->
+    <script>
+        const savedBG = localStorage.getItem('background');
+        if (savedBG) {
+            const bg = JSON.parse(savedBG);
+            if (bg.type === 'color') {
+                document.write(`<style>body{background:${bg.value};}</style>`);
+            } else if (bg.type === 'image') {
+                document.write(`<style>
+          body {
+            background-image: url(${bg.value}) ;
+            background-size: cover;
+            background-repeat: no-repeat;
+          }
+        </style>`);
+            }
+        }
+    </script>
+
+    <link rel="stylesheet" type="text/css" href="/styles/main.css">
+</head>
+
+<body>
+    <div class="bgSelector">
+        <label>選擇網站背景顏色：
+            <select id="colorSelector">
+                <option value="white">白色</option>
+                <option value="darkgray">深色</option>
+                <option value="#e26e5c">珊瑚色</option>
+            </select>
+        </label>
+        <br><br>
+        <label> 上傳自訂圖片：
+            <input type="file" id="imageUploader" accept="image/*">
+        </label>
+    </div>
+
+    <h1>Taco Town 🌮</h1>
+
+    <form action="/recipe" method="POST" class="buttons">
+        <button type="submit" value="chicken" name="choice">🍗</button>
+        <button type="submit" value="beef" name="choice">🥩</button>
+        <button type="submit" value="fish" name="choice">🐟</button>
+    </form>
+
+    <div id="recipeContainer" class="hidden">
+        <% if (locals.recipe) { %>
+            <h2 id="recipeTitle">
+                <%= recipe.name %>
+            </h2>
+            <h3>Ingredients:</h3>
+            <ul id="ingredientsList">
+                <li>
+                    <%= recipe.ingredients.protein.name %>, <%= recipe.ingredients.protein.preparation %>
+                </li>
+                <li>
+                    <%= recipe.ingredients.salsa.name %>
+                </li>
+                <% recipe.ingredients.toppings.forEach(topping=> { %>
+                    <li>
+                        <%= topping.quantity %> of <%= topping.name %>
+                    </li>
+                    <% }); %>
+            </ul>
+            <% } else { %>
+                <h2>Pick your favourite taco ingredient 👆</h2>
+                <% } %>
+    </div>
+
+    <script>
+        // 恢復背景設定
+        document.addEventListener('DOMContentLoaded', () => {
+            const saved = localStorage.getItem('background');
+            if (saved) {
+                const bg = JSON.parse(saved);
+                if (bg.type === 'color') {
+                    document.body.style.backgroundColor = bg.value;
+                    const colorSelector = document.querySelector("#colorSelector");
+                    if (colorSelector) {
+                        colorSelector.value = bg.value; 
+                    }
+                } else if (bg.type === 'image') {
+                    document.body.style.backgroundImage = `url(${bg.value})`;
+                    document.body.style.backgroundSize = 'cover';
+                    document.body.style.backgroundRepeat = 'no-repeat';
+                }
+            }
+        });
+
+        // 顏色切換事件
+        const colorSelector = document.querySelector("#colorSelector");
+        if (colorSelector) {
+            colorSelector.addEventListener("change", function () {
+                document.body.style.backgroundImage = "";
+                document.body.style.backgroundColor = this.value;
+                localStorage.setItem('background', JSON.stringify({ type: 'color', value: this.value }));
+            });
+        }
+
+        // 圖片上傳事件
+        const imageUploader = document.querySelector("#imageUploader");
+        if (imageUploader) {
+            imageUploader.addEventListener("change", function (event) {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        document.body.style.backgroundImage = `url(${e.target.result})`;
+                        document.body.style.backgroundSize = 'cover';
+                        document.body.style.backgroundRepeat = 'no-repeat';
+                        localStorage.setItem('background', JSON.stringify({ type: 'image', value: e.target.result }));
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>

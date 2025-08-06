@@ -1,0 +1,7 @@
+# 忽略 node_modules
+node_modules/
+
+# 忽略其他常見檔案
+.env
+.DS_Store
+dist/
